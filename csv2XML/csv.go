@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -20,15 +22,15 @@ type Csv struct {
 	FileDir      string
 }
 
-func NewCsv(filepath string) *Csv {
+func NewCsv(filePath string) *Csv {
 	csv := &Csv{
-		Filename:     getFileName(filepath),
+		Filename:     getFileName(filePath),
 		NodeList:     make([]*Node, 0),
 		NodePosition: make(map[string]int),
 		CsvBody:      make([]string, 0),
-		FileDir:      getFileDir(filepath),
+		FileDir:      filepath.Dir(filePath),
 	}
-	csv.parseNodePosition(filepath)
+	csv.parseNodePosition(filePath)
 	return csv
 }
 
@@ -54,6 +56,7 @@ func (csv *Csv) parseNodePosition(filePath string) {
 			newLine = ""
 		}
 	}
+
 	for index, line := range lineList {
 		if index == 0 {
 			csvTitle = line
@@ -79,6 +82,9 @@ func (csv *Csv) GetNodeTree() {
 	parentId := root.Id
 	for _, line := range csv.CsvBody {
 		lineList := splitLine(line)
+		if len(lineList) < 3 {
+			continue
+		}
 		actoinRecord := make([]string, 0)
 		for _, field := range nodeField {
 			index := csv.NodePosition[field]
@@ -133,10 +139,9 @@ func (csv *Csv) GetNodeTree() {
 }
 
 func getFileName(filePath string) (fileName string) {
-	fileList := strings.Split(filePath, "/")
-	file := fileList[len(fileList)-1]
-	fileNameList := strings.Split(file, ".")
-	fileName = strings.Join(fileNameList[:len(fileNameList)-1], ".")
+	baseName := filepath.Base(filePath)
+	ext := path.Ext(baseName)
+	fileName = strings.TrimSuffix(baseName, ext)
 	fileName = strings.Split(fileName, "_")[0]
 	return
 }
@@ -181,10 +186,4 @@ func parseStr(s string, split string) (splitList []string) {
 	splitList = append(splitList, single)
 	return
 
-}
-
-func getFileDir(filePath string) (fileDir string) {
-	fileList := strings.Split(filePath, "/")
-	fileDir = strings.Join(fileList[:len(fileList)-1], "/")
-	return
 }

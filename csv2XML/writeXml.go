@@ -4,18 +4,20 @@ import (
 	"encoding/xml"
 	"fmt"
 	"os"
+	"path"
 )
 
 type maps struct {
 	XMLName xml.Name `xml:"map"`
 	Version string   `xml:"version,attr"`
-	Nodes   []*Node   `xml:"node"`
+	Nodes   []*Node  `xml:"node"`
 }
 
 func WriteXML(csv *Csv) {
 	nodeSeen := make(map[string]*Node)
-
-	file, err := os.Create(fmt.Sprint(csv.FileDir, "/", csv.Filename, ".mm"))
+	fileName := fmt.Sprint(csv.Filename, ".mm")
+	filePath := path.Join(csv.FileDir, fileName)
+	file, err := os.Create(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "create file error: %v", err)
 	}
