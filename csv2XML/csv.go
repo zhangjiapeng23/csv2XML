@@ -45,6 +45,9 @@ func (csv *Csv) parseNodePosition(filePath string) {
 		os.Exit(1)
 	}
 	for _, line := range strings.Split(string(data), "\n") {
+		if len(line) <= 1 || strings.HasPrefix(line, ",") {
+			continue
+		}
 		for _, s := range line {
 			if s == '"' {
 				flag = !flag
@@ -82,9 +85,6 @@ func (csv *Csv) GetNodeTree() {
 	parentId := root.Id
 	for _, line := range csv.CsvBody {
 		lineList := splitLine(line)
-		if len(lineList) < 3 {
-			continue
-		}
 		actoinRecord := make([]string, 0)
 		for _, field := range nodeField {
 			index := csv.NodePosition[field]
